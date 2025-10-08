@@ -1,21 +1,26 @@
-ifeq ($(THEOS_PACKAGE_SCHEME),rootless)
-TARGET := iphone:clang:latest:15.0
-ARCHS := arm64 arm64e
-else
-TARGET := iphone:clang:latest:7.0
-ARCHS := armv7 armv7s arm64 arm64e
-endif
+# libundirect/Makefile
 
 include $(THEOS)/makefiles/common.mk
 
+# ターゲット定義
+ARCHS = arm64 arm64e
+TARGET = iphone:clang:$(SDK_VERSION):14.0
+SDK_VERSION ?= 18.6
+
+# ライブラリ名
 LIBRARY_NAME = libundirect
 
-libundirect_FILES = libundirect.m HookCompat.m
-libundirect_CFLAGS = -fobjc-arc
-ifeq ($(THEOS_PACKAGE_SCHEME),rootless)
-libundirect_LDFLAGS += -install_name @rpath/libundirect.dylib
-endif
-libundirect_INSTALL_PATH = /usr/lib
-libundirect_EXTRA_FRAMEWORKS = CydiaSubstrate
+# ソースファイル
+libundirect_FILES = $(wildcard *.m *.mm *.c)
+
+# フラグ
+libundirect_CFLAGS = -fobjc-arc -O2
+libundirect_LDFLAGS = -undefined dynamic_lookup
+
+# インストール先
+THEOS_PACKAGE_DIR_NAME = lib
 
 include $(THEOS_MAKE_PATH)/library.mk
+
+after-install::
+	@echo "libundirect built and installed to $(THEOS)/lib"
